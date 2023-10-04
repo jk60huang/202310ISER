@@ -1,0 +1,125 @@
+﻿/* Wrapping element */
+/* Set some basic padding to keep content from hitting the edges */
+@charset "UTF-8";
+
+:root {
+	--Cyan-color: #197584;
+	--White-color: #FFFFFF;
+	--Silver-color: #F2F2F2;
+	--Iron-color: #E4E4E4;
+	--Steel-color: #D1D1D1;
+	--Stone-color: #B5B5B5;
+	--Dark-color: #343434;
+	--Ice-color: #E2F0F1;
+	--Sea-color: #69CAD9;
+	--Plum-color: #9E1E5C;
+	--Blossom-color: #F4EAEE;
+	--Yellow-color: #D8A603;
+	--Pale-color: #FAF4E1;
+	--Green-color: #148930;
+	--Orange-color: #DA3C03;
+	--Lime-color: #C0E9BA;
+	--Custard-color: #FFEAA3;
+	--Chiffon-color: #FFB078;
+	--Peach-color: #FC8779;
+	--Salmon-color: #FF6D5C;
+	--Grey-color: #CCC;
+}
+
+a {
+	text-decoration: none;
+	color: var(--Cyan-color) !important;
+}
+
+.note {
+	color: red;
+}
+
+label {
+	font-weight: bold;
+}
+
+.card-header {
+	background-color: var(--Ice-color);
+}
+ 
+.table th {
+	text-align: center;
+	white-space: nowrap;
+	font-weight: bold;
+}
+.table td {
+	text-align: center;
+	vertical-align: middle;
+}
+
+ 
+table {
+	border-collapse: collapse;
+}
+
+tbody tr {
+	vertical-align: middle;
+}
+td.right, th.right {
+	text-align: right;
+}
+
+td.left, th.left {
+	text-align: left;
+}
+
+.btn {
+	border-radius: 24px;
+}
+
+.btn-label {
+	border-radius: 6px;
+}
+
+.btn.disabled {
+	background-color: #999;
+	color: #fff;
+	border: none;
+} 
+.btn-primary-isre {
+	background-color: var(--Cyan-color) !important;
+	font-weight: normal;
+	color: var(--White-color) !important;
+}
+
+.bg-ice {
+	background-color: var(--Ice-color) !important;
+}
+
+.color-isre {
+	color: var(--Cyan-color) !important;
+}
+ 
+.modalAjax {
+	display: none;
+	position: fixed;
+	z-index: 8000;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+}
+
+	.modalAjax .loading-icon {
+		position: relative;
+		top: 45%;
+		left: 45%;
+		color: #000;
+	}
+
+
+ 
+.card.active {
+	background-color: var(--Cyan-color) !important;
+	color: var(--White-color) !important;
+}
+
+li, .font85 {
+	font-size: 0.9em;
+}
