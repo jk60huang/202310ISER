@@ -12,7 +12,6 @@
 
 	<main aria-labelledby="title">
 
-
 		<div class=" my-2">
 			<%   
 				dynamic Model = Process_ActivityInfo(GUID);
