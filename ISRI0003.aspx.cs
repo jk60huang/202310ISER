@@ -7,6 +7,10 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using Dapper;
+using static ISRE.ISRI0001;
+using System.Text;
+using System.Web.Services;
+using System.Web;
 
 namespace ISRE
 {
@@ -72,6 +76,113 @@ namespace ISRE
 
             return model;
         }
+
+
+        /// <summary>
+        /// CompParamFormVar
+        /// <para>
+        /// The DynamicParameters class has a dynamic object that represents the anonymous parameters
+        /// </para>
+        /// </summary>
+        /// <param name="paramFormVars"></param>
+        /// <param name="QueryMode"></param>
+        /// <returns>Return data</returns>
+        /// <remarks>
+        /// Creation date: 20231003
+        /// Modification date : 20231003
+        /// Author : Alex Huang
+        /// </remarks> 
+        private static DynamicParameters CompParamFormVarle(List<NameValue> paramFormVars, string QueryMode = "")
+        {
+            DynamicParameters result = new DynamicParameters();
+
+            if (QueryMode != "")
+                result.Add("@QueryMode", QueryMode, DbType.String, ParameterDirection.Input);
+
+            foreach (NameValue ncv in paramFormVars)
+            {
+                if (ncv.Value.Trim().Length > 0)
+                {
+                    result.Add(string.Format(@"@{0}", ncv.Name), ncv.Value, DbType.String, ParameterDirection.Input);
+                }
+            }
+            return result;
+        }
+        /// <summary>
+        ///  WebMethod : InsertData
+        /// </summary>
+        /// <param name="formVars"> on the server we’re going to call is going to be very simple and just capture the content of these values </param>
+        /// <returns>Return data</returns>
+        /// <remarks>
+        /// Creation date: 20231002
+        /// Modification date : 20231003
+        /// Author : Alex Huang
+        /// </remarks> 
+        [WebMethod]
+        public static String InsertData(NameValue[] formVars)
+        {
+
+            List<NameValue> paramFormVars = new List<NameValue>();
+
+            NameValue paramFormVar = new NameValue();
+            DynamicParameters param = new DynamicParameters();
+            StringBuilder sb = new StringBuilder();
+
+            string QueryMode = "C";
+
+            foreach (NameValue nv in formVars)
+            {
+                // strip out ASP.NET form vars like _ViewState/_EventValidation
+                if (!nv.Name.StartsWith("__") && !nv.Name.EndsWith("_S") && !nv.Name.EndsWith("_E"))
+                {
+                    sb.Append(nv.Name);
+                    sb.AppendLine(": " + HttpUtility.HtmlEncode(nv.Value) + "<br/>");
+
+                    paramFormVar = new NameValue
+                    {
+                        Name = nv.Name,
+                        Value = nv.Value ?? ""
+                    };
+                    paramFormVars.Add(paramFormVar);
+                }
+            }
+
+            int i = paramFormVars.Where(x => x.Value != "").Count();
+
+            if (QueryMode != "")
+                param.Add("@QueryMode", QueryMode, DbType.String, ParameterDirection.Input);
+
+            foreach (NameValue ncv in paramFormVars)
+            {
+                var encvName = ncv.Name;
+                var encvValue = ncv.Value;
+
+                if (ncv.Value.Trim().Length > 0)
+                {
+                    param.Add(string.Format(@"@{0}", ncv.Name), ncv.Value, DbType.String, ParameterDirection.Input);
+                }
+            }
+
+            param = CompParamFormVarle(paramFormVars, QueryMode);
+
+            dynamic model = new DynamicParameters();
+
+            using (IDbConnection _dbConn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            {
+                model = _dbConn.Query<dynamic>(
+                                "Session_ISRE_SESSION_MAIN",
+                                param,
+                                commandType: CommandType.StoredProcedure
+                            , commandTimeout: _ConnectionTimeout)
+                            .FirstOrDefault();
+            }
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(new
+            {
+                model
+            });
+        }
+
 
     }
 }

@@ -641,9 +641,10 @@
 
 			</div>
 
-
 			<%--  session   end  --%>
 		</div>
+		<div id="divMessage" class="errordisplay" style=""></div>
+
 	</main>
 	<script> 
 
@@ -656,7 +657,40 @@
                 e.preventDefault();
                 $('#btnCopy, #btnSave, #btnRelease, #btnDelete').addClass('d-none');
                 $('#btnInsert ').removeClass('d-none');
+			});
+
+            $("#btnAdd").click(function () {
+
+
+                var arForm = $("form").serializeArray();	//This method does not accept any arguments.
+                alert($("form").serialize());
+                $("#divMessage").html($("form").serialize());
+
+
+                $.ajax({
+                    type: "POST",
+                    url: 'ISRI0003.aspx/InsertData',
+                    data: JSON.stringify({ formVars: arForm }),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (response) {
+
+                        if (response != null && response.d != null) {
+                            $('#btnAdd').prop('disabled', true);	// Disable button
+                        }
+                    },
+                    error: function () {
+                        alert("Error while inserting data");
+                    }
+                });
+
+
+
+
             });
+
+            $('#btnAdd').prop('disabled', false); // Enable button
+        });
 
 
         });
