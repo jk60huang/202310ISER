@@ -16,31 +16,31 @@ namespace ISRE
         public static readonly IDbConnection _dbConn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString);
         public static readonly int _PageSize = 3;
 
-        
+
         private string RegisterMultiple = "";
         protected void Page_Load(object sender, EventArgs e)
         {
             if (Page.IsPostBack)
             {
-                RegisterMultiple = Request["RegisterMultiple"]; 
+                RegisterMultiple = Request["RegisterMultiple"];
             }
             else
             {
                 RegisterMultiple = Request["RegisterMultiple"];
-            } 
+            }
         }
-        protected  ISRE_ACTIVITY_MAIN Process_ActivityInfo(String GUID)
+        protected ISRE_ACTIVITY_MAIN Process_ActivityInfo(String GUID)
         {
             DynamicParameters param = new DynamicParameters();
             param.Add("@GUID", GUID, DbType.String, ParameterDirection.Input);
             param.Add("@QueryMode", "R", DbType.String, ParameterDirection.Input);
 
-			 ISRE_ACTIVITY_MAIN model = _dbConn.Query<ISRE_ACTIVITY_MAIN>(
-            "Home_ISRE_ACTIVITY_MAIN",
-            param,
-            commandType: CommandType.StoredProcedure
-            , commandTimeout: _ConnectionTimeout)
-            .FirstOrDefault();
+            ISRE_ACTIVITY_MAIN model = _dbConn.Query<ISRE_ACTIVITY_MAIN>(
+           "Home_ISRE_ACTIVITY_MAIN",
+           param,
+           commandType: CommandType.StoredProcedure
+           , commandTimeout: _ConnectionTimeout)
+           .FirstOrDefault();
 
             return model;
         }
@@ -65,7 +65,7 @@ namespace ISRE
                 if (model != null)
                 {
                     model.IsSuccess = "Y";
-                    
+
                 }
                 else  ////////// can't be inserted  for some reason, model should be returned dapperRowObject
                 {
@@ -96,7 +96,7 @@ namespace ISRE
                         model.Message = "Message or InnerException is null";
                     }
 
-                } 
+                }
             }
 
             return model;

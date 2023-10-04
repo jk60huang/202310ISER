@@ -3,8 +3,11 @@
 	Inherits="ISRE.ISRI0002" %>
 
 <%--this page is for backend activity info and sesseion list--%>
+
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
- 
+ <%
+		string GUID =   Request.QueryString["GUID"] ?? ""; ;/////////GUID= activity guid
+%>
 	<main>
 		<div class="my-2"> 
 
@@ -16,7 +19,7 @@
 			<div class="d-flex  justify-content-between  align-items-center mt-5 ">
 				<div></div>
 				<h3 class="text-center ">場次列表</h3>
-				<a href="ISRI0003.aspx" class="btn btn-Create btn-primary-isre px-3">新增場次</a>
+				<a href="ISRI0003.aspx?GUID=<%:GUID %>" class="btn btn-Create btn-primary-isre px-3">新增場次</a>
 			</div>
 
 			<%--session list title columns start --%>
@@ -67,7 +70,7 @@
 
 			<%--session list start  --%>
 			<%  
-				string GUID =   Request.QueryString["GUID"] ?? ""; ;/////////GUID= activity guid
+			
 				dynamic sessions = Process_SessionList(GUID);
 				foreach (var item in sessions)
 				{
@@ -213,15 +216,15 @@
 
 	<script> 
 
-		$(document).ready(function () {
+        $(document).ready(function () {
 
-			$(document).on('click', '#btn_Clear', function (e) {
-				$('#cardInput').find('input[type=text]').val('');
-			});
+            $(document).on('click', '#btn_Clear', function (e) {
+                $('#cardInput').find('input[type=text]').val('');
+            });
 
 
 
-		});
+        });
 
-	</script>
+    </script>
 </asp:Content>
