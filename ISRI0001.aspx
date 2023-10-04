@@ -55,7 +55,6 @@
 					</div>
 				</div>
 
-
 				<div class="  row     ">
 					<div class=" bg-ice   py-3  col-lg-2 border  ">
 						<span class="note">*</span><b><label>活動⽇期</label></b>
