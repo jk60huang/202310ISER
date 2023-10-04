@@ -14,14 +14,10 @@
 
 
 		<div class=" my-2">
-			
-			  
-				
 			<%   
-
 				dynamic Model = Process_ActivityInfo(GUID);
 			%>
-		 
+			<%--  activity form starts--%>
 
 
 			<div class="   ">
@@ -157,9 +153,7 @@
 					<div class="    py-3  border  col-lg-10">
 						<select name="ACT_TYPE" id="ACT_TYPE" class="form-control form-select">
 							<option value="">請選擇</option>
-							<% 
-
-								dynamic List_ACT_TYPE = StaticQueryDB("Home_ISRE_ACTIVITY_MAIN", "ACT_TYPE");
+							<% 								
 								foreach (var item in List_ACT_TYPE)
 								{
 									sSelected = (Model != null && Model.ACT_TYPE.ToString() == item.SerialID.ToString()) ? "selected" : "";
@@ -246,7 +240,8 @@
 				<div class="d-flex justify-content-end ">
 					<div class="text-black-50">
 					<%: (GUID == "") ? "Created By:" : "Modified By:" %> <span>A111888 王⼩明</span>
-					</div> 
+					</div>
+
 				</div>
 				<%--<div class="    row  ">
 					<div class=" border  py-3   bg-ice col-lg-2">
@@ -308,28 +303,11 @@
 					<a href="#" class="btn   btn-primary-isre  text-nowrap     px-sm-4 py-2  me-md-5 mb-2">刪除  </a>
 
 					<%}  %>
-
-					<button class="btn btn-primary-isre text-nowrap   px-sm-4 py-2  me-md-5 mb-2 ">活動上架</button>
-				
 				</div>
-
-
-
-			</div>
-
-
-			 
+			</div>			
 			<%--  activity form end--%>
 		</div>
-
-
-
-
-
-
-
 	</main>
-
 
 	<script> 
 		var SaveForm = function (btn) {
@@ -428,24 +406,7 @@
 		};
 
 		$(document).ready(function () {
-			let guid = "<%:GUID%>"; 
-		 	if (guid == "") $('#flowPlaceHolder').addClass('d-none');
-
-			//$.ajax({
-			//	url: "ActivityFlow.html",
-			//	context: document.body
-			//}).done(function (response) {
-			//	//$(this).addClass("done");
-			//	console.log(response);
-			//	$('#contents').prepend(response);
-			//	$("#flowStep").slider({ 
-			//		ticks: [0, 100, 200, 300, 400],
-			//		ticks_labels: ['$0', '$100', '$200', '$300', '$400'],
-			//		ticks_snap_bounds: 30
-			//	});
-			//});
-
-
+			
 			$("#PUB_DATE_S_DATE , #PUB_DATE_E_DATE , #ACT_DATE_S_DATE , #ACT_DATE_E_DATE ")
 				.datepicker($.datepicker.regional['zh-TW']);
 
@@ -455,18 +416,54 @@
 			//     'timeFormat': 'H: i',
 			//     'step': 5,
 			// });
+          
 			$(document).on('click', '#btn_Insert', function (e) {
 				e.preventDefault();
 				var btn = $(this);
-
+				
 				//var requiredInput = $("#inputForm").find('.requiredInput');
 				//if (HasAllRequireValue(requiredInput) == false)
 				//    return false;
 				SaveForm(btn);
 			});
+
+           
+			/*
+				Creation date: 20231002 By Alex Huang
+				Modification date : 20231003 By Alex Huang
+			*/           
+			$("#btn_Insert").click(function () {
+
+                var arForm = $("form").serializeArray();	//This method does not accept any arguments.
+
+				$.ajax({
+                    type: "POST",
+                    url: 'ISRI0001.aspx/InsertData',
+                    data: JSON.stringify({ formVars: arForm }), 
+                    contentType: "application/json; charset=utf-8",
+					dataType: "json",
+					success: function (response) {
+                        
+                        if (response != null && response.d != null) {    
+                            $('#btn_Insert').prop('disabled', true);	// Disable button
+						}
+                    },
+                    error: function () {
+                        alert("Error while inserting data");
+                    }
+				});
+
+			});
+
+            $('#btn_Insert').prop('disabled', false); // Enable button
+            /*	
+				Creation date: 20231002 By Alex Huang
+				Modification date : 20231003 By Alex Huang
+			*/
+
 		});
 
-	</script>
+    </script>
 </asp:Content>
 
 
