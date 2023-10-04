@@ -17,8 +17,6 @@
 				dynamic Model = Process_ActivityInfo(GUID);
 			%>
 			<%--  activity form starts--%>
-
-
 			<div class="   ">
 				<h3 class="text-center my-2"><%: String.Concat(ActioinName, "活動資訊") %> </h3>
 
