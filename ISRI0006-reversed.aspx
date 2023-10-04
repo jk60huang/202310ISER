@@ -7,9 +7,7 @@
 	<%
 		string GUID = Request.QueryString["GUID"] ?? "";  /////////GUID=session guid 
 		//string ActioinName = (GUID == "") ? "新增" : "編輯";
-	%>
-
-	
+	%>	
 	<main aria-labelledby="title">
 		<div class=" my-2">
 
