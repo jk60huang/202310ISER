@@ -11,7 +11,7 @@ using static ISRE.ISRI0001;
 using System.Text;
 using System.Web.Services;
 using System.Web;
-
+using System.Globalization;
 
 namespace ISRE
 {
@@ -24,17 +24,20 @@ namespace ISRE
         public string SESSIONGUID =string.Empty;
         public string ActioinName = string.Empty;
         public string sSelected = string.Empty;
+        //public string GUID = string.Empty;
+        public string GetGUID = string.Empty;
         public dynamic Model = null;
         public dynamic SESS_LOC = null;
         public dynamic List_CityList = null;
-   
+
+      
 
 
         protected void Page_Load(object sender, EventArgs e)
         {
             
             var GetSESSIONGUID = Request.QueryString["SESSIONGUID"] ?? "";
-            var GetGUID = Request.QueryString["GUID"] ?? "";
+            GetGUID = Request.QueryString["GUID"] ?? "";
 
             //SESSIONGUID = GetSESSIONGUID;1
             //dynamic Model1 = Process_Session(SESSIONGUID);
@@ -48,7 +51,48 @@ namespace ISRE
             SESS_LOC = Request["SESS_LOC"] ?? "";
             List_CityList = StaticQueryDB("Home_ISRE_ACTIVITY_MAIN", "CityList");
 
+            //string ActSeqNO = GetActSeqNO(GetGUID);
+
+            
+                //.Text = GetGUID;
+
+            txtGUID.Text = GetGUID;
+            //Page.ClientScript.RegisterStartupScript(Page.GetType(), "message", "<script language='javascript' defer>$(\"#GUID\").text(\""+ GetGUID + "\");</script>");
+
         }
+
+
+        public static bool IsDate(string strDate)
+        {
+            try
+            {
+                DateTime.Parse(strDate);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static string GetActSeqNO(string GUID = "")
+        {            
+
+            IsreActivityMain01 GetActivityMainDatas = new IsreActivityMain01();
+
+            string GetActSeqNO = string.Empty;
+
+            GetActivityMainDatas = Process_ActivityInfo01(GUID);
+
+            GetActSeqNO = (GetActivityMainDatas == null) ? "" : GetActivityMainDatas.ACT_SEQ_NO;
+
+            return GetActSeqNO;
+
+        }
+
+
+
+
         protected static List<dynamic> StaticQueryDB(string SPName, string QueryMode)
         {
             DynamicParameters param = new DynamicParameters();
@@ -81,6 +125,28 @@ namespace ISRE
             using (IDbConnection _dbConn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
                 model = _dbConn.Query<ISRE_ACTIVITY_MAIN>(
+                        "Home_ISRE_ACTIVITY_MAIN",
+                        param,
+                        commandType: CommandType.StoredProcedure
+                        , commandTimeout: _ConnectionTimeout)
+                        .FirstOrDefault();
+            }
+
+            return model;
+        }
+
+
+        public static IsreActivityMain01 Process_ActivityInfo01(String GUID)
+        {
+            DynamicParameters param = new DynamicParameters();
+            param.Add("@GUID", GUID, DbType.String, ParameterDirection.Input);
+            param.Add("@QueryMode", "R", DbType.String, ParameterDirection.Input);
+            IsreActivityMain01 model = new IsreActivityMain01();
+
+
+            using (IDbConnection _dbConn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            {
+                model = _dbConn.Query<IsreActivityMain01>(
                         "Home_ISRE_ACTIVITY_MAIN",
                         param,
                         commandType: CommandType.StoredProcedure
@@ -178,6 +244,10 @@ namespace ISRE
                     && !nv.Name.StartsWith("SESS_DATE_S")
                     && !nv.Name.StartsWith("SESS_DATE_E")
                     && !nv.Name.StartsWith("REMIND_MAIL_TEXT")
+                    && !nv.Name.StartsWith("CHK_DATE_S_DATE")
+                    && !nv.Name.StartsWith("CHK_DATE_S_TIME") 
+                    && !nv.Name.StartsWith("CHK_DATE_E_DATE")
+                    && !nv.Name.StartsWith("CHK_DATE_E_TIME")
                     ) 
                 {
                     sb.Append(nv.Name);
@@ -197,18 +267,69 @@ namespace ISRE
             if (QueryMode != "")
                 param.Add("@QueryMode", QueryMode, DbType.String, ParameterDirection.Input);
 
+           
+            
+            //string ActSeqNO = GetActSeqNO(GetGUID);
+
+
             foreach (NameValue ncv in paramFormVars)
             {
                 var encvName = ncv.Name;
                 var encvValue = ncv.Value;
+                string tempName = string.Empty;
+                string tempValue = string.Empty;
+                //if (ncv.Value.Trim().Length > 0)
+                //{
+                if (ncv.Name == "ctl00$MainContent$txtGUID")
+                    {
+                        //tempName = "GUID";
+                        string ActSeqNO = GetActSeqNO(ncv.Value);
+                        //param.Add(string.Format(@"@{0}", "GUID"), ncv.Value, DbType.String, ParameterDirection.Input);
+                        param.Add(string.Format(@"@{0}", "ACT_SEQ_NO"), ActSeqNO, DbType.String, ParameterDirection.Input);
+                    }
+                    else 
+                    {
+                        //tempName = ncv.Name;
+                        param.Add(string.Format(@"@{0}", ncv.Name), ncv.Value, DbType.String, ParameterDirection.Input);
+                    }
+                //}
 
-                if (ncv.Value.Trim().Length > 0)
+                switch (ncv.Name)
                 {
-                    param.Add(string.Format(@"@{0}", ncv.Name), ncv.Value, DbType.String, ParameterDirection.Input);
+                    case "ctl00$MainContent$txtGUID":
+                        string ActSeqNO = GetActSeqNO(ncv.Value);
+                        param.Add(string.Format(@"@{0}", "ACT_SEQ_NO"), ActSeqNO, DbType.String, ParameterDirection.Input);
+                        break;
+
+                    case "SESS_DATE_S_DATE":
+                    case "SESS_DATE_E_DATE":
+                    case "REG_DATE_S":
+                    case "REG_DATE_E":
+                    case "CHK_DATE_S_DATE":
+                    case "CHK_DATE_E_DATE":
+                    case "sch_s_datepicker":
+                        //Console.WriteLine($"Measured value is {measurement}; too high.");                        
+                        CultureInfo culture = new CultureInfo("zh-TW");
+                        culture.DateTimeFormat.Calendar = new System.Globalization.TaiwanCalendar();
+
+                        if (IsDate(ncv.Value)) 
+                        {
+                            DateTime dateTime = DateTime.Parse(ncv.Value, culture);
+                            tempValue = dateTime.ToString("yyy/MM/dd");
+                            param.Add(string.Format(@"@{0}", ncv.Name), tempValue, DbType.String, ParameterDirection.Input);
+                        }
+
+                        break;
+                    default:
+                        param.Add(string.Format(@"@{0}", ncv.Name), ncv.Value, DbType.String, ParameterDirection.Input);
+                        break;
                 }
+
             }
 
-            param = CompParamFormVarle(paramFormVars, QueryMode);
+
+
+            //param = CompParamFormVarle(paramFormVars, QueryMode);
 
             dynamic model = new DynamicParameters();
 
@@ -228,6 +349,37 @@ namespace ISRE
             });
         }
 
+        // Derive a new class from ISRE_ACTIVITY_MAIN.
+        public class IsreActivityMain01  
+        {
+            public string ACT_ENABLE { get; set; }
+            //public string PUB_DATE_S { get; set; }
+            //public string PUB_DATE_E { get; set; }
+            public string USER_ID { get; set; }
+            public string AGENT_ID { get; set; }
+            public string ACT_STATUS { get; set; }
+            public string ACT_TYPE { get; set; }
+            public string ACT_NAME { get; set; }
+            public string ACT_IMG { get; set; }
+            public string ACT_DESC { get; set; }
+            public string OBJ_NO { get; set; }
+            public string OBJ_DESC { get; set; }
+            public string ACT_HOST { get; set; }
+            public string ACT_CO_HOST { get; set; }
+            public string ACT_CONTACT_INFO { get; set; }
+            public string CREATE_DATE { get; set; }
+            public string TXT_DATE { get; set; }
+            public string TXT_USER_ID { get; set; }
+            public string GUID { get; set; }
 
+            public string ACT_SEQ_NO { get; set; }
+            public string PUB_DATE_S { get; set; }
+
+            public string PUB_DATE_E { get; set; }
+
+            public string ACT_DATE_S { get; set; }
+
+            public string ACT_DATE_E { get; set; }
+        }
     }
 }

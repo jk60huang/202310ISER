@@ -595,6 +595,8 @@
                 </div>
 
             </div>
+            <asp:TextBox ID="txtGUID" CssClass="display:none" runat="server"></asp:TextBox>
+           <%-- <input id="GUID" type="text" class="display:none" />--%>
             <%--  session   end  --%>
         </div>
         <div id="divMessage" class="errordisplay" style=""></div>

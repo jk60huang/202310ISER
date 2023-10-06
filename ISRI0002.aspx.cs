@@ -35,12 +35,19 @@ namespace ISRE
             param.Add("@GUID", GUID, DbType.String, ParameterDirection.Input);
             param.Add("@QueryMode", "R", DbType.String, ParameterDirection.Input);
 
-            ISRE_ACTIVITY_MAIN model = _dbConn.Query<ISRE_ACTIVITY_MAIN>(
+            ISRE_ACTIVITY_MAIN model = new ISRE_ACTIVITY_MAIN();
+
+
+            using (IDbConnection _dbConn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            {
+                model = _dbConn.Query<ISRE_ACTIVITY_MAIN>(
            "Home_ISRE_ACTIVITY_MAIN",
            param,
            commandType: CommandType.StoredProcedure
            , commandTimeout: _ConnectionTimeout)
            .FirstOrDefault();
+    
+            }
 
             return model;
         }
@@ -110,12 +117,18 @@ namespace ISRE
             param.Add("@GUID", GUID, DbType.String, ParameterDirection.Input);
             param.Add("@QueryMode", "SessionList", DbType.String, ParameterDirection.Input);
 
-            List<ISRE_SESSION_MAIN> model = _dbConn.Query<ISRE_SESSION_MAIN>(
-            "Home_ISRE_ACTIVITY_MAIN",
-            param,
-            commandType: CommandType.StoredProcedure
-            , commandTimeout: _ConnectionTimeout)
-            .ToList();
+            List<ISRE_SESSION_MAIN> model =  new List<ISRE_SESSION_MAIN>();
+
+            using (IDbConnection _dbConn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            {
+                model = _dbConn.Query<ISRE_SESSION_MAIN>(
+                        "Home_ISRE_ACTIVITY_MAIN",
+                        param,
+                        commandType: CommandType.StoredProcedure
+                        , commandTimeout: _ConnectionTimeout)
+                        .ToList();
+
+            }
 
             return model;
         }
