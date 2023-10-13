@@ -12,6 +12,9 @@ using System.Text;
 using System.Web.Services;
 using System.Web;
 using System.Globalization;
+using System.Text.RegularExpressions;
+using Newtonsoft.Json.Linq;
+using System.Collections.Specialized;
 
 namespace ISRE
 {
@@ -51,28 +54,10 @@ namespace ISRE
             SESS_LOC = Request["SESS_LOC"] ?? "";
             List_CityList = StaticQueryDB("Home_ISRE_ACTIVITY_MAIN", "CityList");
 
-            //string ActSeqNO = GetActSeqNO(GetGUID);
-
-            
-                //.Text = GetGUID;
+            btnAdd.Enabled = GetGUID.Length!=0;
 
             txtGUID.Text = GetGUID;
-            //Page.ClientScript.RegisterStartupScript(Page.GetType(), "message", "<script language='javascript' defer>$(\"#GUID\").text(\""+ GetGUID + "\");</script>");
 
-        }
-
-
-        public static bool IsDate(string strDate)
-        {
-            try
-            {
-                DateTime.Parse(strDate);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
         }
 
         public static string GetActSeqNO(string GUID = "")
@@ -243,7 +228,6 @@ namespace ISRE
                 if (!nv.Name.StartsWith("__") 
                     && !nv.Name.StartsWith("SESS_DATE_S")
                     && !nv.Name.StartsWith("SESS_DATE_E")
-                    && !nv.Name.StartsWith("REMIND_MAIL_TEXT")
                     && !nv.Name.StartsWith("CHK_DATE_S_DATE")
                     && !nv.Name.StartsWith("CHK_DATE_S_TIME") 
                     && !nv.Name.StartsWith("CHK_DATE_E_DATE")
@@ -266,10 +250,6 @@ namespace ISRE
 
             if (QueryMode != "")
                 param.Add("@QueryMode", QueryMode, DbType.String, ParameterDirection.Input);
-
-           
-            
-            //string ActSeqNO = GetActSeqNO(GetGUID);
 
 
             foreach (NameValue ncv in paramFormVars)
@@ -381,5 +361,167 @@ namespace ISRE
 
             public string ACT_DATE_E { get; set; }
         }
+
+
+
+        protected void btnAdd_Click(object sender, EventArgs e)
+        {
+
+            Send00(sender, e);
+            Response.Redirect(string.Format("ISRI0002.aspx?GUID={0}", GetGUID));
+        }
+
+        protected void Send00(object sender, EventArgs e)
+        {
+
+            NameValueCollection coll;
+
+            //Load Form variables into NameValueCollection variable.
+            coll = Request.Form;
+
+            DynamicParameters param = new DynamicParameters();
+            string QueryMode = "C";
+            string ActSeqNO = GetActSeqNO(GetGUID);
+
+            param.Add("@QueryMode", QueryMode, DbType.String, ParameterDirection.Input);
+            param.Add(string.Format(@"@{0}", "ACT_SEQ_NO"), ActSeqNO, DbType.String, ParameterDirection.Input);
+
+            foreach (string key in Request.Form.AllKeys)
+            {
+                var stras = "";
+                if (!key.StartsWith("__")
+                        && !key.StartsWith("ctl00$MainContent$btnAdd"))
+                {
+
+                    string value = Request.Form[key]; // do something with the key-value pair
+                    //Response.Write(stras + "Form: " + key + "=" + Server.HtmlEncode(value) + "<br>");
+                    param.Add(string.Format(@"@{0}", key), value, DbType.String, ParameterDirection.Input);
+
+                }
+
+
+
+            }
+            dynamic model = new DynamicParameters();
+
+            using (IDbConnection _dbConn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            {
+                model = _dbConn.Query<dynamic>(
+                                "Session_ISRE_SESSION_MAIN",
+                                param,
+                                commandType: CommandType.StoredProcedure
+                            , commandTimeout: _ConnectionTimeout)
+                            .FirstOrDefault();
+            }
+
+        }
+
+      
+
+        protected void btnInsert_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        /// <summary>
+        /// 判斷是否為日期
+        /// </summary>
+        /// <param name="pDate">傳入字串。</param>
+        public static bool IsDate(string pDate)
+        {
+            return Regex.IsMatch(pDate, @"^((((1[6-9]|[2-9]\d)\d{2})-(0?[13578]|1[02])-(0?[1-9]|[12]\d|3[01]))|(((1[6-9]|[2-9]\d)\d{2})-(0?[13456789]|1[012])-(0?[1-9]|[12]\d|30))|(((1[6-9]|[2-9]\d)\d{2})-0?2-(0?[1-9]|1\d|2[0-9]))|(((1[6-9]|[2-9]\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00))-0?2-29-))$");
+        }
+
+        /// <summary>
+        /// 判斷是否為時間HHmm
+        /// </summary>
+        /// <param name="pTime">傳入字串。</param>
+        public static bool IsTimeHHmm(string pTime)
+        {
+            return Regex.IsMatch(pTime, @"^((20|21|22|23|[0-1]?\d):[0-5]?\d)$");
+        }
+
+        /// <summary>
+        /// 判斷是否為時間HHmmss
+        /// </summary>
+        /// <param name="pTime">傳入字串。</param>
+        public static bool IsTimeHHmmss(string pTime)
+        {
+            return Regex.IsMatch(pTime, @"^((20|21|22|23|[0-1]?\d):[0-5]?\d:[0-5]?\d)$");
+        }
+        
+
+        /// <summary>
+        /// 判斷是否日期+時間
+        /// </summary>
+        /// <param name="pDateTime"></param>
+        public static bool IsDateTime(string pDateTime)
+        {
+            return Regex.IsMatch(pDateTime, @"^(((((1[6-9]|[2-9]\d)\d{2})-(0?[13578]|1[02])-(0?[1-9]|[12]\d|3[01]))|(((1[6-9]|[2-9]\d)\d{2})-(0?[13456789]|1[012])-(0?[1-9]|[12]\d|30))|(((1[6-9]|[2-9]\d)\d{2})-0?2-(0?[1-9]|1\d|2[0-8]))|(((1[6-9]|[2-9]\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00))-0?2-29-)) (20|21|22|23|[0-1]?\d):[0-5]?\d:[0-5]?\d)$ ");
+        }
+
+        public static string ToADDate(string pDate)
+        {
+            if (pDate == "")
+                return null;
+
+            CultureInfo culture = new CultureInfo("zh-TW");
+            culture.DateTimeFormat.Calendar = new TaiwanCalendar();
+            DateTime dateTime = DateTime.Parse(pDate, culture);
+            var s = DateTime.Parse(pDate, culture).ToString("yyy/MM/d");
+            return DateTime.Parse(pDate, culture).ToString("yyy/MM/dd");
+        }
+
+        /// <summary>
+        /// 回傳yyyy/MM/dd
+        /// </summary>
+        /// <param name="pDate">傳入字串。</param>
+        public static string ToyyyyMMdd(string pDate)
+        {
+            string mReturn = string.Empty;
+
+            if (pDate != "")
+            {
+                mReturn = DateTime.Parse(pDate).ToString("yyyy/MM/dd");
+            }
+            return mReturn;
+        }
+        /// <summary>
+        /// 回傳yyyy/MM/dd
+        /// </summary>
+        /// <param name="pDate">傳入字串。</param>
+        public static string ToyyyyMMddHHmmss(string pDate)
+        {           
+
+            if (pDate == "")
+                return null;
+
+            return DateTime.Parse(pDate).ToString("yyy/MM/dd HH:mm:ss");
+
+        }
+        public static string toADDate(string pDate)
+        {
+            if (pDate == "")
+                return null;
+
+            CultureInfo culture = new CultureInfo("zh-TW");
+            culture.DateTimeFormat.Calendar = new TaiwanCalendar();
+            DateTime dateTime = DateTime.Parse(pDate, culture);
+            var s = DateTime.Parse(pDate, culture).ToString("yyy/MM/d");
+            return DateTime.Parse(pDate, culture).ToString("yyy/MM/dd");
+        }
+        public static string toADDateTime(string pDate)
+        {
+            if (pDate == "")
+                return null;
+
+            CultureInfo culture = new CultureInfo("zh-TW");
+            culture.DateTimeFormat.Calendar = new TaiwanCalendar();
+            DateTime dateTime = DateTime.Parse(pDate, culture);
+            var s = DateTime.Parse(pDate, culture).ToString("yyy/MM/dd HH:mm:ss");
+            return DateTime.Parse(pDate, culture).ToString("yyy/MM/dd HH:mm:ss");
+        }
+
     }
+
 }

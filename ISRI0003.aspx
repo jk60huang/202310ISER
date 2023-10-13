@@ -4,6 +4,7 @@
 
 <%--this page is for backend session create/edit--%>
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
+
     <style>
         /*.custom-file {
     position: relative;
@@ -110,14 +111,12 @@
                         <div class="d-flex">
                             <input type="text" id="SESS_DATE_S_DATE" name="SESS_DATE_S_DATE"
                                 class="form-control mx-1 requiredInput"
-                                placeholder="民國年/月/日">
+                                placeholder="民國年/月/日"     >
                             <input type="time" id="SESS_DATE_S_TIME" name="SESS_DATE_S_TIME"
                                 placeholder="HH:mm"
                                 class="form-control mx-1 requiredInput">
-                            <input type="hidden" id="SESS_DATE_S" name="SESS_DATE_S"
-                                value="<%: (Model !=null &&  Model.SESS_DATE_S!=null
-                      ? Model.SESS_DATE_S 
-                      : DateTime.Now )  %>" />
+                            <%--<input type="hidden" id="SESS_DATE_S" name="SESS_DATE_S"
+                                value="<%: (Model !=null &&  Model.SESS_DATE_S!=null ? Model.SESS_DATE_S : DateTime.Now ) %>" />--%>
                             <span>~ </span>
                             <input type="text" id="SESS_DATE_E_DATE" name="SESS_DATE_E_DATE"
                                 class="form-control mx-1 requiredInput"
@@ -125,10 +124,10 @@
 
                             <input type="time" id="SESS_DATE_E_TIME" name="SESS_DATE_E_TIME"
                                 placeholder="HH:mm" class="form-control mx-1 requiredInput">
-                            <input type="hidden" id="SESS_DATE_E" name="SESS_DATE_E"
+                            <%--<input type="hidden" id="SESS_DATE_E" name="SESS_DATE_E"
                                 value="<%: (Model !=null &&  Model.SESS_DATE_E!=null
                          ? Model.SESS_DATE_E 
-                         : DateTime.Now )  %>" />
+                         : DateTime.Now )  %>" />--%>
                         </div>
                     </div>
                 </div>
@@ -344,8 +343,9 @@
                         <div class="d-flex">
                             <%--	<a href="#" class="btn btn-primary-isre px-5">選擇檔案</a>--%>
 
-                            <input type="file" id="fileUpload" name="fileUpload"
-                                class="form-control-file border   ">
+                            <%--<input type="file" id="fileUpload" name="fileUpload"
+                                class="form-control-file border   " accept=".csv,.xls,.xlsx">--%>
+                            <asp:FileUpload ID="FileUpload1" accept=".csv,.xls,.xlsx" runat="server" />
                         </div>
                         <div>
                             <table class="table  ">
@@ -570,8 +570,8 @@
 
                     <% if (Model != null)
                         {%>
-                    <a href="#" id="btnInsert" class="btn btn-primary-isre d-none text-nowrap    px-sm-4 py-2  me-md-5 m-2 ">新增</a>
-
+                   <%-- <a href="#" id="btnInsert" class="btn btn-primary-isre d-none text-nowrap    px-sm-4 py-2  me-md-5 m-2 ">新增</a>2--%>
+                    <asp:Button ID="btnInsert" runat="server" Text="新增" CssClass="btn btn-primary-isre d-none text-nowrap    px-sm-4 py-2  me-md-5 m-2 " OnClick="btnInsert_Click"  />
                     <a href="#" id="btnSave" class="btn btn-primary-isre  text-nowrap    px-sm-4 py-2  me-md-5 m-2 ">儲存</a>
 
                     <a href="#" id="btnCopy" class="btn btn-primary-isre  text-nowrap    px-sm-4 py-2  me-md-5 m-2 ">複製資料</a>
@@ -581,8 +581,8 @@
                     <% }
                     else
                     { %>
-                    <a href="#" id="btnAdd" class="btn btn-primary-isre  text-nowrap    px-sm-4 py-2  me-md-5 m-2 ">新增</a>
-
+                   <%-- <a href="#" id="btnAdd" class="btn btn-primary-isre  text-nowrap    px-sm-4 py-2  me-md-5 m-2 ">新增</a>1--%>
+                    <asp:Button ID="btnAdd" runat="server" Text="新增" CssClass="btn btn-primary-isre  text-nowrap    px-sm-4 py-2  me-md-5 m-2 " OnClick="btnAdd_Click" />
                     <%}%>
                     <a href="#" id="btnBack" class="btn btn-primary-isre  text-nowrap    px-sm-4 py-2  me-md-5 m-2 ">回前一頁</a>
 
@@ -595,60 +595,26 @@
                 </div>
 
             </div>
-            <asp:TextBox ID="txtGUID" CssClass="display:none" runat="server"></asp:TextBox>
+            <asp:TextBox ID="txtGUID" CssClass="display:none" runat="server" Visible="false"></asp:TextBox>
            <%-- <input id="GUID" type="text" class="display:none" />--%>
             <%--  session   end  --%>
         </div>
-        <div id="divMessage" class="errordisplay" style=""></div>
+       
 
     </main>
-    <script> 
+     <script > 
 
-        $(document).ready(function () {
-            $("#SESS_DATE_S_DATE, #SESS_DATE_E_DATE,#REG_DATE_S, #REG_DATE_E, #CHK_DATE_S_DATE, #CHK_DATE_E_DATE, #REMIND_MAIL_DATE, #sch_s_datepicker")
-                .datepicker($.datepicker.regional['zh-TW']);
-
-
-            $(document).on('click', '#btnCopy', function (e) {
-                e.preventDefault();
-                $('#btnCopy, #btnSave, #btnRelease, #btnDelete').addClass('d-none');
-                $('#btnInsert ').removeClass('d-none');
-            });
-
-            $("#btnAdd").click(function () {
+         $(document).ready(function () {
+             $("#SESS_DATE_S_DATE, #SESS_DATE_E_DATE,#REG_DATE_S, #REG_DATE_E, #CHK_DATE_S_DATE, #CHK_DATE_E_DATE, #REMIND_MAIL_DATE, #sch_s_datepicker")
+                 .datepicker($.datepicker.regional['zh-TW']);
 
 
-                var arForm = $("form").serializeArray();	//This method does not accept any arguments.
-                alert($("form").serialize());
-                $("#divMessage").html($("form").serialize());
+             $(document).on('click', '#btnCopy', function (e) {
+                 e.preventDefault();
+                 $('#btnCopy, #btnSave, #btnRelease, #btnDelete').addClass('d-none');
+                 $('#btnInsert ').removeClass('d-none');
+             });
+         });
 
-
-                $.ajax({
-                    type: "POST",
-                    url: 'ISRI0003.aspx/InsertData',
-                    data: JSON.stringify({ formVars: arForm }),
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    success: function (response) {
-
-                        if (response != null && response.d != null) {
-                            $('#btnAdd').prop('disabled', true);	// Disable button
-                        }
-                    },
-                    error: function () {
-                        alert("Error while inserting data");
-                    }
-                });
-
-
-
-
-            });
-
-            $('#btnAdd').prop('disabled', false); // Enable button
-      
-
-        });
-
-    </script>
+     </script>   
 </asp:Content>
