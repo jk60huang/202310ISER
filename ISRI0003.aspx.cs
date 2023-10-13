@@ -755,7 +755,7 @@ namespace ISRE
         /// </summary>
         public class NameValue
         { 
-            /// <summary>
+            /// <summary> 
             /// Name
             /// </summary>
             public string Name { get; set; }
