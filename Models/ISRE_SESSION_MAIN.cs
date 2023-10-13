@@ -38,7 +38,7 @@ namespace ISRE
         public string REMIND_MAIL { get; set; }
         public string REMIND_MAIL_ENABLE { get; set; }
         public DateTime REMIND_MAIL_DATE { get; set; }
-        public DateTime REMIND_MAIL_TIME { get; set; }
+        public DateTime? REMIND_MAIL_TIME { get; set; }
         public DateTime TXT_DATE { get; set; }
         public string TXT_USER_ID { get; set; }
          

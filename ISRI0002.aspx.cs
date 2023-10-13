@@ -121,12 +121,22 @@ namespace ISRE
 
             using (IDbConnection _dbConn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
-                model = _dbConn.Query<ISRE_SESSION_MAIN>(
+
+
+                try { 
+                        model = _dbConn.Query<ISRE_SESSION_MAIN>(
                         "Home_ISRE_ACTIVITY_MAIN",
                         param,
                         commandType: CommandType.StoredProcedure
                         , commandTimeout: _ConnectionTimeout)
                         .ToList();
+                }
+                catch  
+                {
+                    throw;
+
+                }
+
 
             }
 

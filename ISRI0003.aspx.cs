@@ -60,6 +60,20 @@ namespace ISRE
 
         }
 
+
+        //public static bool IsDate(string strDate)
+        //{
+        //    try
+        //    {
+        //        DateTime.Parse(strDate);
+        //        return true;
+        //    }
+        //    catch
+        //    {
+        //        return false;
+        //    }
+        //}
+
         public static string GetActSeqNO(string GUID = "")
         {            
 
@@ -251,6 +265,10 @@ namespace ISRE
             if (QueryMode != "")
                 param.Add("@QueryMode", QueryMode, DbType.String, ParameterDirection.Input);
 
+           
+            
+            //string ActSeqNO = GetActSeqNO(GetGUID);
+
 
             foreach (NameValue ncv in paramFormVars)
             {
@@ -368,7 +386,6 @@ namespace ISRE
         {
 
             Send00(sender, e);
-            Response.Redirect(string.Format("ISRI0002.aspx?GUID={0}", GetGUID));
         }
 
         protected void Send00(object sender, EventArgs e)
@@ -389,17 +406,11 @@ namespace ISRE
             foreach (string key in Request.Form.AllKeys)
             {
                 var stras = "";
-                if (!key.StartsWith("__")
-                        && !key.StartsWith("ctl00$MainContent$btnAdd"))
-                {
-
-                    string value = Request.Form[key]; // do something with the key-value pair
-                    //Response.Write(stras + "Form: " + key + "=" + Server.HtmlEncode(value) + "<br>");
-                    param.Add(string.Format(@"@{0}", key), value, DbType.String, ParameterDirection.Input);
-
-                }
-
-
+                if (key.StartsWith("__")
+                       && !key.StartsWith("ctl00$MainContent$btnAdd")) continue;
+                string value = Request.Form[key]; // do something with the key-value pair
+                Response.Write(stras+"Form: " + key + "=" + Server.HtmlEncode(value) + "<br>");
+                param.Add(string.Format(@"@{0}", key), value, DbType.String, ParameterDirection.Input);
 
             }
             dynamic model = new DynamicParameters();
@@ -416,7 +427,224 @@ namespace ISRE
 
         }
 
-      
+        protected void Send01(object sender, EventArgs e)
+        {
+            string CHK_DATE_S_DATE = string.Empty;
+            string CHK_DATE_S_TIME = string.Empty; string CHK_DATE_E_DATE = string.Empty; string CHK_DATE_E_TIME = string.Empty;
+
+
+            if (GetGUID.Trim().Length == 0)
+            {
+                Page.ClientScript.RegisterStartupScript(Page.GetType(), "message", "<script language='javascript' defer>alert('無GUID值');</script>");
+                return;
+            }
+
+            Dictionary<string, string> MyDic = new Dictionary<string, string>();
+            DynamicParameters param = new DynamicParameters();
+
+            string QueryMode = "C";
+            string ActSeqNO = GetActSeqNO(GetGUID);
+
+            param.Add("@QueryMode", QueryMode, DbType.String, ParameterDirection.Input);
+            param.Add(string.Format(@"@{0}", "ACT_SEQ_NO"), ActSeqNO, DbType.String, ParameterDirection.Input);
+
+            List<NameValue> paramFormVars = new List<NameValue>();
+            NameValue paramFormVar = new NameValue();
+
+            MyDic.Add("CHK_DATE_S", "");
+            MyDic.Add("CHK_DATE_E", "");
+            foreach (string key in Request.Form.AllKeys)
+            {
+                string value = Request.Form[key]; // do something with the key-value pair
+
+                if (null != value)
+                {
+                    if (!key.StartsWith("__")
+                        && !key.StartsWith("ctl00$MainContent$btnAdd") && !key.StartsWith("SESS_DATE_E_TIME") && key.StartsWith("CHK_DATE_S_TIME")
+
+                                            && !key.StartsWith("SESS_DATE_S")
+                    && !key.StartsWith("SESS_DATE_E")
+                    && !key.StartsWith("CHK_DATE_S_DATE")
+                    && !key.StartsWith("CHK_DATE_S_TIME")
+                    && !key.StartsWith("CHK_DATE_E_DATE")
+                    && !key.StartsWith("CHK_DATE_E_TIME")
+                        )
+                    {
+                        switch (key)
+                        {
+                            case "SESS_DATE_S_DATE":
+                            case "SESS_DATE_E_DATE":
+                            case "CHK_DATE_S_DATE":
+                            case "CHK_DATE_E_DATE":
+                                MyDic.Add(key, toADDate(value));
+                                paramFormVar = new NameValue
+                                {
+                                    Name = key,
+                                    Value = toADDate(value)
+                                };
+
+                                break;
+
+                            case "REMIND_MAIL_DATE":
+                                MyDic.Add(key, toADDate(value));
+                                paramFormVar = new NameValue
+                                {
+                                    Name = key,
+                                    Value = toADDate(value)
+                                };
+                                if (value.Length > 0)
+                                    param.Add(string.Format(@"@{0}", key), toADDate(value), DbType.String, ParameterDirection.Input);
+
+
+                                break;
+                            //case "SESS_DATE_S":
+                            //case "SESS_DATE_E":
+                            case "REG_DATE_S":
+                            case "REG_DATE_E":
+                                MyDic.Add(key, ToyyyyMMddHHmmss(value));
+                                paramFormVar = new NameValue
+                                {
+                                    Name = key,
+                                    Value = ToyyyyMMddHHmmss(value)
+                                };
+                                if (value.Length > 0)
+                                    param.Add(string.Format(@"@{0}", key), ToyyyyMMddHHmmss(value), DbType.String, ParameterDirection.Input);
+                                break;
+
+                            case "SESS_DATE_S_TIME":
+                                break;
+                            default:
+                                MyDic.Add(key, value);
+                                paramFormVar = new NameValue
+                                {
+                                    Name = key,
+                                    Value = value
+                                };
+
+                                if (value != null)
+                                    param.Add(string.Format(@"@{0}", key), value, DbType.String, ParameterDirection.Input);
+                                break;
+                        }
+
+                        paramFormVars.Add(paramFormVar);
+
+                    }
+
+                }
+
+
+
+            }
+
+
+
+
+            //var MyDicValDATE = MyDic.Where(x => x.Key == "SESS_DATE_S_DATE").Select(x=>x.Value);
+            //var MyDicValTime = MyDic.Where(x => x.Key == "SESS_DATE_S_Time").Select(x => x.Value);
+            //if (MyDicValDATE.ToString().Length == 0 || MyDicValTime.ToString().Length == 0)
+            //{
+            //    MyDic["SESS_DATE_S"] = string.Empty;
+            //}
+            //else
+            //{
+            //    param.Add(string.Format(@"@{0}", key), value, DbType.String, ParameterDirection.Input);
+            //}
+
+            //MyDicValDATE = MyDic.Where(x => x.Key == "SESS_DATE_E_DATE").Select(x => x.Value);
+            //MyDicValTime = MyDic.Where(x => x.Key == "SESS_DATE_E_Time").Select(x => x.Value);
+            //if (MyDicValDATE.ToString().Length == 0 || MyDicValTime.ToString().Length == 0)
+            //{
+            //    MyDic["SESS_DATE_E"] = string.Empty;
+            //}
+
+            //string tempDatetime = string.Empty;
+
+            //MyDicValDATE = MyDic.Where(x => x.Key == "CHK_DATE_S_DATE").Select(x => x.Value);
+            //MyDicValTime = MyDic.Where(x => x.Key == "CHK_DATE_S_Time").Select(x => x.Value);
+            //if (String.IsNullOrEmpty(MyDicValDATE.ToString()) || String.IsNullOrEmpty(MyDicValTime.ToString()))
+            //{   
+            //    MyDic["CHK_DATE_S"] = string.Empty;
+            //}
+            //else
+            //{
+            //    tempDatetime = string.Format("{0} {1}", MyDicValDATE.ToString(), MyDicValTime.ToString());
+            //    MyDic["CHK_DATE_S"] = tempDatetime;
+            //}
+
+            //MyDicValDATE = MyDic.Where(x => x.Key == "CHK_DATE_E_DATE").Select(x => x.Value);
+            //MyDicValTime = MyDic.Where(x => x.Key == "CHK_DATE_E_Time").Select(x => x.Value);
+            //if (MyDicValDATE.ToString().Length == 0 || MyDicValTime.ToString().Length == 0)
+            //{
+            //    MyDic["CHK_DATE_E"] = string.Empty;
+            //}
+            //else
+            //{
+            //    tempDatetime = string.Format("{0} {1}", MyDicValDATE.ToString(), MyDicValTime.ToString());
+            //    MyDic["CHK_DATE_E"] = tempDatetime;
+            //}
+
+            string l = string.Empty;
+
+            //foreach (KeyValuePair<string, string> item in MyDic)
+            //{
+
+            //    switch (item.Key)
+            //    {
+            //        case "SESS_DATE_S":
+            //        case "SESS_DATE_E":
+            //        case "CHK_DATE_S":
+            //        case "CHK_DATE_E":
+            //        case "SESS_LOC":
+            //        case "REG_DATE_S":
+            //        case "REG_DATE_E":
+            //        case "SESS_HOST":
+            //        case "SESS_CO_HOST":
+            //        case "SESS_CONTACT_INFO":
+            //        case "REG_MAX_COUNT":
+            //        case "WAIT_NAX_COUNT":
+            //        case "UNIT_NAX_COUNT":
+            //        case "VIDEO_LINK":
+            //        case "ATTACH_VIDEO_LINK":
+            //        case "CONFIRM_MAIL":
+            //        case "SUCCESS_MAIL":
+            //        case "WAIT_MAIL":
+            //        case "REMIND_MAIL_ENABLE":
+            //        case "REMIND_MAIL_DATE":
+            //        case "REMIND_MAIL_TIME":
+            //        case "REMIND_MAIL_TEXT":
+
+            //               if(item.Value != null || item.Value.Length >0) 
+            //                param.Add(string.Format(@"@{0}", item.Key), item.Value, DbType.String, ParameterDirection.Input);
+            //            break;
+            //    }
+
+
+
+
+            dynamic model = new DynamicParameters();
+
+            using (IDbConnection _dbConn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            {
+                model = _dbConn.Query<dynamic>(
+                                "Session_ISRE_SESSION_MAIN",
+                                param,
+                                commandType: CommandType.StoredProcedure
+                            , commandTimeout: _ConnectionTimeout)
+                            .FirstOrDefault();
+            }
+
+
+
+
+            //}
+
+
+            //var itemsToRemove = MyDic.Where(f => f.Value == null).Where(f =>f.Value == "").ToArray();
+            //foreach (var item in itemsToRemove)
+            //    MyDic.Remove(item.Key);
+
+        }
+
 
         protected void btnInsert_Click(object sender, EventArgs e)
         {
@@ -520,6 +748,21 @@ namespace ISRE
             DateTime dateTime = DateTime.Parse(pDate, culture);
             var s = DateTime.Parse(pDate, culture).ToString("yyy/MM/dd HH:mm:ss");
             return DateTime.Parse(pDate, culture).ToString("yyy/MM/dd HH:mm:ss");
+        }
+
+        /// <summary>
+        /// The NameValue class is as simple as this and simply maps the structure of the array elements of .serializeArray():
+        /// </summary>
+        public class NameValue
+        {
+            /// <summary>
+            /// Name
+            /// </summary>
+            public string Name { get; set; }
+            /// <summary>
+            /// ValueS
+            /// </summary>
+            public string Value { get; set; }
         }
 
     }

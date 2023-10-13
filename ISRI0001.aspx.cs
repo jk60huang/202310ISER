@@ -11,6 +11,7 @@ using System.Web.Services;
 using System.Text;
 using System.Web;
 using static ISRE.ISRI0001;
+using System.Globalization;
 
 namespace ISRE
 {
@@ -142,13 +143,16 @@ namespace ISRE
             NameValue paramFormVar = new NameValue();
             DynamicParameters param = new DynamicParameters();
             StringBuilder sb = new StringBuilder();
-
+            string tempValue = string.Empty;
             string QueryMode = "C";
 
             foreach (NameValue nv in formVars)
             {
                 // strip out ASP.NET form vars like _ViewState/_EventValidation
-                if (!nv.Name.StartsWith("__") && !nv.Name.EndsWith("_S") && !nv.Name.EndsWith("_E"))
+                if (!nv.Name.StartsWith("__") 
+                    && !nv.Name.EndsWith("_S_DATE") && !nv.Name.EndsWith("_S_TIME")
+                    && !nv.Name.EndsWith("_E_DATE") && !nv.Name.EndsWith("_E_TIME")
+                    )
                 {
                     sb.Append(nv.Name);
                     sb.AppendLine(": " + HttpUtility.HtmlEncode(nv.Value) + "<br/>");
@@ -169,13 +173,36 @@ namespace ISRE
 
             foreach (NameValue ncv in paramFormVars)
             {
-                var encvName = ncv.Name;
-                var encvValue = ncv.Value;
-
-                if (ncv.Value.Trim().Length > 0)
+                switch (ncv.Name)
                 {
-                    param.Add(string.Format(@"@{0}", ncv.Name), ncv.Value, DbType.String, ParameterDirection.Input);
+                    case "PUB_DATE_S":
+                    case "PUB_DATE_E":
+                    case "ACT_DATE_S":
+                    case "ACT_DATE_E":
+ 
+                        CultureInfo culture = new CultureInfo("zh-TW");
+                        culture.DateTimeFormat.Calendar = new System.Globalization.TaiwanCalendar();
+
+                        if (IsDate(ncv.Value))
+                        {
+                            DateTime dateTime = DateTime.Parse(ncv.Value, culture);
+                            tempValue = dateTime.ToString();//.ToString("yyy/MM/dd");
+                            param.Add(string.Format(@"@{0}", ncv.Name), tempValue, DbType.DateTime, ParameterDirection.Input);
+                        }
+
+                        break;
+                    default:
+                        param.Add(string.Format(@"@{0}", ncv.Name), ncv.Value, DbType.String, ParameterDirection.Input);
+                        break;
                 }
+
+
+
+
+                //if (ncv.Value.Trim().Length > 0)
+                //{
+                //    param.Add(string.Format(@"@{0}", ncv.Name), ncv.Value, DbType.String, ParameterDirection.Input);
+                //}
             }
 
             param = CompParamFormVarle(paramFormVars, QueryMode);
@@ -198,7 +225,18 @@ namespace ISRE
             });
         }
 
-
+        public static bool IsDate(string strDate)
+        {
+            try
+            {
+                DateTime.Parse(strDate);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
         /// <summary>
         /// The NameValue class is as simple as this and simply maps the structure of the array elements of .serializeArray():
         /// </summary>

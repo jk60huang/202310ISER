@@ -594,10 +594,8 @@
 
                 </div>
 
-            </div>
-            <asp:TextBox ID="txtGUID" CssClass="display:none" runat="server" Visible="false"></asp:TextBox>
-           <%-- <input id="GUID" type="text" class="display:none" />--%>
-            <%--  session   end  --%>
+            </div>            
+
         </div>
        
 
