@@ -76,7 +76,7 @@
             <div id="ISRI_SessionFlow" runat="server">
                 <!-- #Include virtual="ISRI_SessionFlow.aspx" -->
             </div>
-
+             
             <%--session   start  --%>
             <h3 class="text-center mt-5 mb-2"><%: String.Concat(ActioinName, "場次資訊") %> </h3>
 
