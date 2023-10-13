@@ -754,7 +754,7 @@ namespace ISRE
         /// The NameValue class is as simple as this and simply maps the structure of the array elements of .serializeArray():
         /// </summary>
         public class NameValue
-        {
+        { 
             /// <summary>
             /// Name
             /// </summary>
